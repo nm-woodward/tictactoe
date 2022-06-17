@@ -1,4 +1,5 @@
 var cells = document.querySelectorAll(".cell");
+var messageArea = document.querySelector("#MessageArea");
 
 const Player = (human,mark,winner) => {
     const getMark = () => mark;
@@ -17,6 +18,7 @@ const Player = (human,mark,winner) => {
        // Choose a random index for computer move
        randChoice = emptyIndexes[Math.floor(Math.random()*emptyIndexes.length)];
        gameBoard.setSquareStatus(randChoice,mark);
+       messageArea.innerHTML = "Back to you...";
       }
       
     
@@ -29,7 +31,8 @@ const Player = (human,mark,winner) => {
       if(moveAllowed == 1) {
         gameBoard.setSquareStatus(cell.getAttribute('data-index'),mark);
         console.log(cell.getAttribute('data-index'));
-        moveAllowed = 0;
+        displayController.playRound();
+        
       }
     }
     
@@ -72,10 +75,10 @@ const gameBoard = (() => {
       });
 
       if(gameBoard.winner == 'X'){
-        console.log('And X is the winner!');
+        messageArea.innerHTML = 'And X is the winner!';
       }
       if(gameBoard.winner == 'O'){
-        console.log('And O is the winner!');
+        messageArea.innerHTML ='And O is the winner!';
       }
 
     }    
@@ -85,22 +88,23 @@ const gameBoard = (() => {
 
   const displayController = (() => {
     
-    const runGame = () => {
+    const startGame = () => {
       // Create players
       humanPlayer = Player(true,"X",false);
       compPlayer = Player(false,"O",false);
 
-      while (gameBoard.winner == '') {
-        humanPlayer.makeMove();
+      messageArea.innerHTML = "Make the first move...";
+      humanPlayer.makeMove();
 
-        while(humanPlayer.moveAllowed == 1)
-        {}
+    }
+    const playRound = () => {
 
-          render();
-          compPlayer.makeMove();
-          render();
-      }
-
+      render();
+      gameBoard.checkForWinner();
+      compPlayer.makeMove();
+      render();
+      gameBoard.checkForWinner();
+      
     }
 
     const render = () => {
@@ -118,10 +122,11 @@ const gameBoard = (() => {
     const endGame = () => {
 
     }
-    return {runGame,render,endGame};
+    return {startGame,playRound,render,endGame};
   })(); 
 
 
-
+// Kick off the game
+displayController.startGame();
 
   // const elements = document.querySelector("li[data-id='2']") = board.getSquareStatus(2);
