@@ -1,30 +1,56 @@
-var cells = Array.from(document.getElementsByClassName("cell"));
+var cells = document.querySelectorAll(".cell");
 
 const Player = (human,mark,winner) => {
     const getMark = () => mark;
     const getIdentity = () => human;
     const makeMove = () => {
+      if (human) {
+        moveAllowed = 1;
+      }
+      else {
+        // Find all empty index values in the board
+        const emptyIndexes = [];
+        for(let i=0;i<gameBoard.getBoard().length; i++) {
+            if (gameBoard.board[i] == null) 
+            {emptyIndexes.push(i);}
+        }
+       // Choose a random index for computer move
+       randChoice = emptyIndexes[Math.floor(Math.random()*emptyIndexes.length)];
+       gameBoard.setSquareStatus(randChoice,mark);
+      }
+      
     
-    cells.forEach(cell => {
-        cell.addEventListener('click', function handleClick() {
-          gameBoard.setSquareStatus(cell.getAttribute('data-index'),mark);
-          console.log(cell.getAttribute('data-index'));
-
-          //Remove all click listeners
-          //cells.forEach(cell => {console.log('a')});
-
-        });
-    });
-
-
     };
-  return {getMark,getIdentity,makeMove};
+    // Initialize trigger to allow player click/move
+    let moveAllowed = 0;
+
+    // Function to handle player click/move action
+    const handleClick = (cell) => {
+      if(moveAllowed == 1) {
+        gameBoard.setSquareStatus(cell.getAttribute('data-index'),mark);
+        console.log(cell.getAttribute('data-index'));
+        moveAllowed = 0;
+      }
+    }
+    
+    //Initialize event listener for player click/move
+    cells.forEach(cell => {
+        cell.addEventListener('click', function(){
+            handleClick(cell);          
+          });
+
+    });
+   
+
+
+  return {getMark,getIdentity,makeMove,winner};
 
 }
 
 const gameBoard = (() => {
     let board  = new Array(9);
     let winner = '';
+    const getBoard = () => board;
     const getSquareStatus = (index) => {board[index];}
     const setSquareStatus = (index, mark) => {board[index] = mark;}
     const checkForWinner = () => {
@@ -54,15 +80,31 @@ const gameBoard = (() => {
 
     }    
     
-    return {board,winner, getSquareStatus, setSquareStatus, checkForWinner};
+    return {getBoard,board,winner, getSquareStatus, setSquareStatus, checkForWinner};
   })();
 
   const displayController = (() => {
     
-    const render = () => {
-        console.log(gameBoard.board);
+    const runGame = () => {
+      // Create players
+      humanPlayer = Player(true,"X",false);
+      compPlayer = Player(false,"O",false);
 
-        
+      while (gameBoard.winner == '') {
+        humanPlayer.makeMove();
+
+        while(humanPlayer.moveAllowed == 1)
+        {}
+
+          render();
+          compPlayer.makeMove();
+          render();
+      }
+
+    }
+
+    const render = () => {
+      // Reset HTML to match contents of board object
           for(var i = 0; i < cells.length; i++)
           {
             console.log(cells[i]);
@@ -76,11 +118,10 @@ const gameBoard = (() => {
     const endGame = () => {
 
     }
-    return {render,endGame};
+    return {runGame,render,endGame};
   })(); 
 
-  humanPlayer = Player(true,"X",false);
-  compPlayer = Player(false,"O",false);
+
 
 
   // const elements = document.querySelector("li[data-id='2']") = board.getSquareStatus(2);
